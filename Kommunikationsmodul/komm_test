@@ -1,0 +1,214 @@
+/*
+ * Kommunikationsmodul_test.cpp
+ *
+ * Created: 4/2/2016 5:14:27 PM
+ *  Author: marhi386
+ */ 
+
+
+//Sätt till rätt hastighet
+#ifndef F_CPU
+#define F_CPU 16000000UL
+#endif
+
+
+// Definiera BAUD
+#define BAUD 9600
+// Sätt Baudratevärde för UBRR
+#define BAUDRATE ((F_CPU)/(BAUD*16UL)-1)
+
+
+#include <avr/io.h>
+#include <avr/interrupt.h>
+#include <util/delay.h>
+#include <stdlib.h>
+#include <util/setbaud.h>
+#include <string.h>
+
+//*********Global Variabel************************************
+char newCommand;
+
+//Drive = 1, Arm = 2, Test = 3
+int mode = 3; //KÖRLÄGE
+
+//*********INIT-funktioner************************************
+
+//TEST INIT
+void test_init()
+{
+}
+
+// Funktion för att initiera UART
+void uart_init()
+{
+	// Skifta registret höger 8 bitar
+	UBRRH = (BAUDRATE<<8);
+
+	// Sätt baudrate
+	UBRRL = BAUDRATE;
+
+	// Aktivera mottagare och sändare
+	UCSRB|= (1<<TXEN)|(1<<RXEN)|(1<<RXCIE);
+	
+	// Välj 8-bitars dataformat
+	UCSRC|= (1<<UCSZ1)|(1<<UCSZ0);
+}
+
+// Initiera Masterenhet
+void spi_init_master()
+{
+	// Sätt MOSI, SCK, SS0(styr) och SS1(sens) som output
+	DDRB = (1<<5)|(1<<7)|(1<<4)|(1<<0); 
+	
+	// Aktivera SPI, Sätt till Master
+	//SCK-frekvens: Fosc/16
+	SPCR = (1<<SPE)|(1<<MSTR)|(1<<SPR0); 
+	
+	SPDR = 0; //Tömm dataregister
+}
+
+//***************Övriga funktioner*****************************
+
+// Funktion för att skicka data
+void uart_Write (unsigned char data)
+{
+	// Vänta tills registret är ledigt
+	while (!( UCSRA & (1<<UDRE)));
+
+	// Ladda in data i registret
+	UDR = data;
+}
+
+// Funktion för att ta emot data
+unsigned char uart_Read()
+{
+	// Vänta tills data har mottagits
+	while(!(UCSRA) & (1<<RXC));
+
+	// Returnera 8 bitar data
+	return UDR;
+}
+
+////////////SPI//////////////////////
+
+void select_slave(int slave_nr)
+{
+	if (slave_nr == 0) //Ingen
+	{
+		PORTB &= ~(1<<4)|~(1<<0);
+	}
+	else if (slave_nr == 1) //Styr
+	{
+		PORTB &= ~(1<<0);
+		PORTB |= 1<<4;
+	}
+	else if (slave_nr == 2) //Sensor
+	{
+		PORTB &= ~(1<<4);
+		PORTB |= 1<<0;
+	}
+}
+
+//Funktion för att skicka och ta emot 8 bitar
+unsigned char spi_WriteRead_8 (unsigned char data, int slave_nr)
+{
+	select_slave(slave_nr);
+	//Ladda in data som ska skickas
+	SPDR = data;
+	
+	//Vänta tills överföring är klar
+	while(!(SPSR &(1<<SPIF) ));
+	
+	//Returnera mottagen data
+	return(SPDR);
+}
+
+//Funktion för att skicka 8 bitar
+void spi_Write_8 (unsigned char data, int slave_nr)
+{
+	select_slave(slave_nr);
+	//Ladda in data som ska skickas
+	SPDR = data;
+	
+	//Vänta tills överföring är klar
+	while(!(SPSR &(1<<SPIF) ));
+}
+
+//Funktion för att skicka och ta emot en lista
+void spi_WriteRead_array (uint8_t* dataToSend, uint8_t* dataRecieved, const int slave_nr)
+{
+	select_slave(slave_nr);
+	
+	int length = sizeof(dataToSend)/sizeof(dataToSend[0]);
+	 
+	for (int i = 0; i < length; i++)
+	{
+		//Ladda in data som ska skickas
+		SPDR = dataToSend[i];
+		//Vänta tills överföring är klar
+		while(!(SPSR &(1<<SPIF) ));
+		//Skriv mottagen data
+		dataRecieved[i] = SPDR;
+	}
+}
+
+//Funktion för att skicka en lista
+void spi_Write_array (uint8_t* dataToSend, const int slave_nr)
+{
+	select_slave(slave_nr);
+	
+	int length = sizeof(dataToSend)/sizeof(dataToSend[0]);
+
+	for (int i = 0; i < length; i++)
+	{
+		//Ladda in data som ska skickas
+		SPDR = dataToSend[i];
+		//Vänta tills överföring är klar
+		while(!(SPSR &(1<<SPIF) ));
+	}
+}
+
+////////////////////////////////////////
+
+void readCommand(char command, char& mode)
+{
+	switch(command)
+	{
+		case 'D': mode = command;
+		break;
+		//LÄGG TILL ALLA COMMANDS
+		
+	}
+}
+
+//******************Avbrottsrutiner***********************
+ISR(USART_RXC_vect)
+{
+	newCommand = UDR;
+}
+
+//******************MAIN**********************************
+int main(void)
+{
+	spi_init_master();
+    uart_init();
+	test_init();
+
+	sei();
+	while(1)
+    {
+		if (mode == 1) //DRIVE
+		{
+			//Läs sensorvärden
+			//Skicka till dator
+			
+			//läs styrbeslut 
+			//skicka till dator
+		}
+		else if (mode == 3) //TEST
+		{
+			
+		}
+    }
+}
+

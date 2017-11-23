@@ -1,0 +1,423 @@
+/*
+ * Styrmodul.cpp
+ *
+ * Created: 2016-03-31 13:16:13
+ *  Author: Martin
+ */ 
+
+
+// Definiera BAUD
+#define BAUD 9600
+// Sätt Baudratevärde för UBRR
+#define BAUDRATE ((F_CPU)/(BAUD*16UL)-1)
+
+
+//Sätt till rätt hastighet
+#ifndef F_CPU
+#define F_CPU 16000000UL
+#endif
+
+#include <avr/io.h>
+#include <avr/interrupt.h>
+#include <util/delay.h>
+#include <stdlib.h>
+#include <util/setbaud.h>
+
+//*********Globala variabler*************
+
+//UART
+const int uart_buffer_max = 20; //Storlek på buffer
+volatile unsigned char uart_buffer[uart_buffer_max]; //Buffer där senast mottagna datan ligger
+volatile unsigned char uart_ctr = 0; // håller reda på var i buffern vi är
+volatile bool uart_rx_flag = false; //true om vi fått ett nytt värde i buffern
+
+//SPI
+const int spi_buffer_max = 20;
+volatile unsigned char spi_buffer[spi_buffer_max];
+volatile unsigned char spi_ctr = 0;
+volatile bool spi_rx_flag = false;
+
+//PWM
+//Definera höger/vänster sida fram och bakutgångar
+#define LeftBackward PORTB |= (1<<0);
+#define LeftForward PORTB &= ~(1<<0);
+#define RightForward PORTB |= (1<<1);
+#define RightBackward PORTB &= ~(1<<1);
+
+//char mode = 'S';
+char new_mode = 'S';
+char temp = 'S';
+void test_run();
+
+//*********INIT-funktioner************************************
+
+// Funktion för att initiera UART
+void uart_init()
+{
+	// Skifta registret höger 8 bitar
+	UBRR0H = (BAUDRATE<<8);
+
+	// Sätt baudrate
+	UBRR0L = BAUDRATE;
+
+	// Aktivera mottagare och sändare
+	UCSR0B|= (1<<TXEN0)|(1<<RXEN0)|(1<<RXCIE0);
+	
+	// Välj 8-bitars dataformat
+	UCSR0C|= (1<<UCSZ01)|(1<<UCSZ00);
+}
+
+// Initiera Slavenhet
+void spi_init_slave()
+{
+	DDRB = (1<<6); //MISO till OUTPUT
+	SPCR = (1<<SPE)|(1<<SPIE); //Aktivera SPI och avbrott
+	SPDR = 0; //Tömm dataregister
+	DDRD |= (1<<7); //avbrott till master
+}
+
+
+//PWM
+//Initiering
+void pwm_init()
+{
+	// init TCCR1A reg, se sid 103
+	TCCR1A |=(1<<COM1A0) |(1<<COM1A1) | (1<<COM1B0) |(1<<COM1B1) | (1<<WGM10);
+	TCCR1A &= ~(1<<WGM11);
+	
+	// init TCCR1B reg,
+	TCCR1B |= (1<<CS11) | (1<<CS10);
+	TCCR1B &= ~(1<<WGM12) | ~(1<<CS12);
+	
+	// OC1A och OC1B till output
+	DDRD |=  (1<<4) | (1<<5);
+	// Sätt PB1 poch PB2 till output (styrsignal)
+	DDRB |= (1<<1) | (1<<0);
+	// Output compare interrupt, se sida 108
+	TIMSK1 |= (1<<OCIE1A) | (1<<OCIE1B);
+	
+	//Stå stilla som startläge
+	OCR1A = 0xFF;
+	OCR1B = 0xFF;
+	
+	// Sätter riktning till framåt
+	RightForward;
+	LeftForward;
+}
+
+//***************BUSS*******************************
+
+// Funktion för att skicka data
+void uart_sendChar(unsigned char data)
+{
+	// Vänta tills registret är ledigt
+	while (!( UCSR0A & (1<<UDRE0)));
+
+	// Ladda in data i registret
+	UDR0 = data;
+}
+
+void uart_sendString(const char *string, int delay)
+{
+	while(*string)
+	{
+		uart_sendChar(*string++);
+		while(delay > 0)
+		{
+			_delay_ms(1);
+			delay--;
+		}
+	}
+}
+
+// Funktion för att ta emot data
+unsigned char uart_readChar()
+{
+	// Vänta tills data har mottagits
+	while(!(UCSR0A) & (1<<RXC0));
+
+	// Returnera 8 bitar data
+	return UDR0;
+}
+
+////////SPI////////////
+
+//Funktion för att skicka och ta emot data för master och slave
+unsigned char spi_WriteRead_char (unsigned char data)
+{
+	//Ladda in data som ska skickas
+	SPDR = data;
+	
+	//Vänta tills överföring är klar
+	while(!(SPSR &(1<<SPIF) ));
+	
+	//Returnera mottagen data
+	return(SPDR);
+}
+
+void spi_sendInterrupt()
+{
+		PORTD |= 1<<7;
+		PORTD &= ~(1<<7);
+}
+
+////////Tolka kommandon//////////
+void uart_process()
+{
+	switch(uart_buffer[uart_ctr-1]) //Om kommandot vi fick in va...
+	{
+		// '!' nollstället buffer-räknaren, kan va bra om man inte längre bryr sig om det gamla i buffern
+		case '!': uart_ctr = 0; 
+		break;
+		
+		case 'U': 
+		PORTA = 0xff;
+		uart_ctr = 0;
+		break;
+		case 'D':
+		PORTA = 0x00;
+		uart_ctr = 0;
+		break;
+		
+		case 'A':
+		PORTA = 0xff;
+		SPDR = 'A';
+		spi_sendInterrupt();
+		uart_ctr = 0;
+		break;
+	}
+}
+
+void spi_process()
+{
+	switch(spi_buffer[spi_ctr-1])
+	{
+		case '!': 
+		spi_ctr = 0;
+		break;
+		
+		//Kör frammåt
+		case 'U':
+		new_mode = 'U';
+		PORTA = 0xff;
+		break;
+		
+		//Kör frammåt
+		case 'D':
+		new_mode = 'D';
+		PORTA = 0xff;
+		break;
+		
+		//test_run();
+		spi_ctr = 0;
+		break;
+		
+		case 'A':
+		PORTA = 0xff;
+		SPDR = 'A';
+		spi_sendInterrupt();
+		spi_ctr = 0;
+		break;	
+				
+		case 'B':
+		uart_sendChar('B');
+		uart_ctr = 0;
+		break;
+	}
+	
+	if(temp != new_mode)
+	{
+		temp = new_mode;
+	}
+}
+
+///////Övriga funktioner/////////////////
+
+void get_sensorData()
+{
+	//IMPLEMENTERA
+}
+
+void delay(int time)
+{
+	while (time > 0)
+	{
+		time--;
+		_delay_ms(1);
+	}
+}
+//////////PWM-funktioner///////////////////////
+
+//Kör vänster sida
+//Inargument duty (hastighet)
+void SetPWMOutput_right(uint8_t duty)
+{
+	OCR1A=duty;
+}
+
+//Kör höger sida
+//Inargument duty (hastighet)
+void SetPWMOutput_left(uint8_t duty)
+{
+	OCR1B=duty;
+}
+
+void stop()
+{
+	OCR1A = 0xFF;
+	OCR1B = 0xFF;
+}
+//Rotera höger
+//Inargument: duty (hastighet)
+void rotate_right(uint8_t duty)
+{
+	RightBackward;
+	LeftForward;
+	SetPWMOutput_left(duty);
+	SetPWMOutput_right(duty);
+}
+
+//Rotera vänster
+//Inargument: duty (hastighet)
+void rotate_left(uint8_t duty)
+{
+	RightForward;
+	LeftBackward;
+	SetPWMOutput_left(duty);
+	SetPWMOutput_right(duty);
+}
+
+//Kör framåt
+//Inargument: duty (hastighet)
+void move_forward(uint8_t duty)
+{
+	RightForward;
+	LeftForward;
+	SetPWMOutput_left(duty);
+	SetPWMOutput_right(duty);
+}
+
+//Kör bakåt
+//Inargument: duty (hastighet)
+void move_backwards(uint8_t duty)
+{
+	RightBackward;
+	LeftBackward;
+	SetPWMOutput_left(duty);
+	SetPWMOutput_right(duty);
+}
+
+//Sväng höger
+//Inargument: duty (hastighet)
+void turn_left(uint8_t duty)
+{
+	RightForward;
+	LeftForward;
+	SetPWMOutput_left(254);
+	SetPWMOutput_right(duty);
+}
+
+//Sväng vänster
+//Inargument: duty (hastighet)
+void turn_right(uint8_t duty)
+{
+	RightForward;
+	LeftForward;
+	SetPWMOutput_left(duty);
+	SetPWMOutput_right(254);
+}
+
+// Ändra hastighet, dvs duty_cycle
+void change_speed(uint8_t& duty, uint8_t speed)
+{
+	duty = speed;
+}
+
+void cases(char& mode, uint8_t duty_cycle)
+{
+	if (mode == 'S' )
+	{
+		stop();
+	}
+	else if(mode == 'U')
+	{
+		move_forward(duty_cycle);
+	}
+	else if(mode == 'D')
+	{
+		move_backwards(duty_cycle);
+	}
+	else if(mode == 'R')
+	{
+		turn_right(duty_cycle);
+	}
+	else if(mode == 'L')
+	{
+		turn_left(duty_cycle);
+	}
+}
+
+//testfunktion
+void test_run()
+{
+	//Testdel för alla rörelser
+	turn_right(140);
+}
+
+//******************Avbrottsrutiner***********************
+ISR(SPI_STC_vect)
+{
+	if(spi_ctr == spi_buffer_max) // Är bufferräknaren vid max, nollställ
+	{
+		spi_ctr = 0;
+	}
+	spi_buffer[spi_ctr++] = SPDR;
+	spi_rx_flag = true;
+}
+
+ISR(USART0_RX_vect)
+{
+	if(uart_ctr == uart_buffer_max) // Är bufferräknaren vid max, nollställ
+	{
+		uart_ctr = 0;
+	}
+	uart_buffer[uart_ctr++] = UDR0;
+	uart_rx_flag = true;
+}
+//******************MAIN***********************************
+int main(void)
+{
+	DDRA = 0xff; //port a output
+	spi_init_slave();
+    uart_init();
+	pwm_init();
+	
+	sei();
+
+	while(1)
+    {
+	    if (uart_rx_flag)// Om vi mottagit data via uart
+	    {
+			
+		    uart_rx_flag = false;
+		    uart_process();
+	    }
+	    if (spi_rx_flag)// Om vi mottagit data via spi
+	    {
+		    spi_rx_flag = false;
+		    spi_process();  
+	    }
+		/*
+		if (new_mode != temp)
+		{
+			temp = new_mode;
+			cases(temp, 140);
+		}
+		else
+		{
+			cases(temp,140);
+		}*/
+		cases(temp, 140);
+	}
+}
+

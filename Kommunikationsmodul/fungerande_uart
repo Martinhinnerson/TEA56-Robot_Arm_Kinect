@@ -1,0 +1,222 @@
+/*
+ * Kommunikationsmodul_test.cpp
+ *
+ * Created: 4/2/2016 5:14:27 PM
+ *  Author: marhi386
+ */ 
+
+
+//Sätt till rätt hastighet
+#ifndef F_CPU
+#define F_CPU 14745000UL
+#endif
+
+
+// Definiera BAUD
+//#define BAUD 115200UL
+#define BAUD 201600UL //FULLÖSNING
+// Sätt Baudratevärde för UBRR
+#define BAUDRATE ((F_CPU)/(BAUD*16UL)-1)
+
+
+#include <avr/io.h>
+#include <avr/interrupt.h>
+#include <util/delay.h>
+#include <stdlib.h>
+#include <util/setbaud.h>
+#include <string.h>
+
+//*********Global Variabel************************************
+
+//Drive = 1
+int mode = 1; //KÖRLÄGE
+
+//UART
+const int uart_buffer_max = 20; //Storlek på buffer
+unsigned char uart_buffer[uart_buffer_max]; //Buffer där senast mottagna datan ligger
+unsigned char uart_ctr = 0; // håller reda på var i buffern vi är
+bool uart_rx_flag = false; //true om vi fått ett nytt värde i buffern
+
+//SPI
+const int spi_buffer_max = 20;
+unsigned char spi_buffer[spi_buffer_max];
+unsigned char spi_ctr = 0;
+bool spi_rx_flag = false;
+
+//*********INIT-funktioner************************************
+
+//TEST INIT
+void test_init()
+{
+	DDRA = 0xff;
+}
+
+// Funktion för att initiera UART
+void uart_init()
+{
+	// Skifta registret höger 8 bitar
+	UBRRH = (BAUDRATE>>8);
+
+	// Sätt baudrate
+	UBRRL = BAUDRATE;
+
+	// Aktivera mottagare och sändare
+	UCSRB|= (1<<TXEN)|(1<<RXEN)|(1<<RXCIE);
+
+	// Välj 8-bitars dataformat
+	UCSRC|= (1<<URSEL)|(1<<UCSZ1)|(1<<UCSZ0);
+}
+
+// Initiera Masterenhet
+void spi_init_master()
+{
+	// Sätt MOSI, SCK, SS0(styr) och SS1(sens) som output
+	DDRB = (1<<5)|(1<<7)|(1<<4)|(1<<0); 
+	
+	// Aktivera SPI, Sätt till Master
+	//SCK-frekvens: Fosc/16
+	SPCR = (1<<SPE)|(1<<MSTR)|(1<<SPR0)|(1<<SPR1); 
+	
+	SPDR = 0; //Tömm dataregister
+}
+
+//***************BUSS*****************************
+
+// Funktion för att skicka data
+void uart_sendChar(unsigned char data)
+{
+	// Vänta tills registret är ledigt
+	while (!( UCSRA & (1<<UDRE)));
+
+	// Ladda in data i registret
+	UDR = data;
+}
+
+void uart_sendString(const char *string, int delay)
+{
+	while(*string)
+	{
+		uart_sendChar(*string++);
+		while(delay > 0)
+		{
+			_delay_ms(1);
+			delay--;
+		}
+	}
+}
+
+// Funktion för att ta emot data
+unsigned char uart_readChar()
+{
+	// Vänta tills data har mottagits
+	while(!(UCSRA) & (1<<RXC));
+	
+	// Returnera 8 bitar data
+	return UDR;
+}
+
+
+
+////////////SPI//////////////////////
+
+void select_slave(int slave_nr)
+{
+	if (slave_nr == 2) //Ingen
+	{
+		PORTB |= (1<<4)|(1<<0);
+	}
+	else if (slave_nr == 1) //Styr
+	{
+		PORTB &= ~(1<<0);
+		PORTB |= 1<<4;
+	}
+	else if (slave_nr == 0) //Sens
+	{
+		PORTB &= ~(1<<4);
+		PORTB |= 1<<0;
+	}
+}
+
+//Funktion för att skicka och ta emot 8 bitar
+unsigned char spi_WriteRead_char (unsigned char data, int slave_nr)
+{
+	select_slave(slave_nr);
+	//Ladda in data som ska skickas
+	SPDR = data;
+	
+	//Vänta tills överföring är klar
+	while(!(SPSR &(1<<SPIF) ));
+	
+	//Returnera mottagen data
+	return(SPDR);
+	select_slave(2); //koppla från
+}
+
+////////Tolka kommandon//////////
+void uart_process()
+{
+	switch(uart_buffer[uart_ctr-1]) //Om kommandot vi fick in va...
+	{
+		// '!' nollstället buffer-räknaren, kan va bra om man inte längre bryr sig om det gamla i buffern
+		case '!': uart_ctr = 0;
+		break;
+		
+		case 'S':
+		PORTA = 0xff;
+		uart_sendChar('S');
+		uart_ctr = 0;
+		break;
+		
+		case 'R':
+		PORTA = 0x00;
+		uart_sendChar('R');
+		uart_ctr = 0;
+		break; 
+	}
+}
+
+void spi_process()
+{
+	switch(spi_buffer[spi_ctr-1])
+	{
+		case '!':
+		spi_ctr = 0;
+		break;
+	}
+}
+
+
+//******************Avbrottsrutiner***********************
+ISR(USART_RXC_vect)
+{
+	if(uart_ctr == uart_buffer_max) // Är bufferräknaren vid max, nollställ
+	{
+		uart_ctr = 0;
+	}
+	uart_buffer[uart_ctr++] = UDR;	
+	uart_rx_flag = true;	
+}
+
+//******************MAIN**********************************
+// SS: 1 = styr, 0 = sens
+int main(void)
+{	
+	spi_init_master();
+    uart_init();
+	test_init();
+
+	sei();
+	while(1)
+    {
+		if (mode == 1) //DRIVE
+		{
+				if (uart_rx_flag)// Om vi mottagit data via uart
+				{
+					uart_process();
+					uart_rx_flag = false;
+				}
+			_delay_ms(1);
+		}
+	}
+}
+

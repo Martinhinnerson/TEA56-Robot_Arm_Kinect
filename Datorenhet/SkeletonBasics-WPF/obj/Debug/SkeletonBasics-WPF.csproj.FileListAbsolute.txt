@@ -1,0 +1,87 @@
+C:\Users\John\Documents\Kinect Program\fwdtsea56kodtillkinect\SkeletonBasics-WPF\bin\Debug\SkeletonBasics-WPF.exe
+C:\Users\John\Documents\Kinect Program\fwdtsea56kodtillkinect\SkeletonBasics-WPF\bin\Debug\SkeletonBasics-WPF.pdb
+C:\Users\John\Documents\Kinect Program\fwdtsea56kodtillkinect\SkeletonBasics-WPF\bin\Debug\Microsoft.Kinect.dll
+C:\Users\John\Documents\Kinect Program\fwdtsea56kodtillkinect\SkeletonBasics-WPF\bin\Debug\Microsoft.Kinect.xml
+C:\Users\John\Documents\Kinect Program\fwdtsea56kodtillkinect\SkeletonBasics-WPF\obj\Debug\SkeletonBasics-WPF.csprojResolveAssemblyReference.cache
+C:\Users\John\Documents\Kinect Program\fwdtsea56kodtillkinect\SkeletonBasics-WPF\obj\Debug\MainWindow.baml
+C:\Users\John\Documents\Kinect Program\fwdtsea56kodtillkinect\SkeletonBasics-WPF\obj\Debug\MainWindow.g.cs
+C:\Users\John\Documents\Kinect Program\fwdtsea56kodtillkinect\SkeletonBasics-WPF\obj\Debug\App.g.cs
+C:\Users\John\Documents\Kinect Program\fwdtsea56kodtillkinect\SkeletonBasics-WPF\obj\Debug\SkeletonBasics-WPF_MarkupCompile.cache
+C:\Users\John\Documents\Kinect Program\fwdtsea56kodtillkinect\SkeletonBasics-WPF\obj\Debug\SkeletonBasics-WPF.g.resources
+C:\Users\John\Documents\Kinect Program\fwdtsea56kodtillkinect\SkeletonBasics-WPF\obj\Debug\Microsoft.Samples.Kinect.SkeletonBasics.Properties.Resources.resources
+C:\Users\John\Documents\Kinect Program\fwdtsea56kodtillkinect\SkeletonBasics-WPF\obj\Debug\SkeletonBasics-WPF.csproj.GenerateResource.Cache
+C:\Users\John\Documents\Kinect Program\fwdtsea56kodtillkinect\SkeletonBasics-WPF\obj\Debug\SkeletonBasics-WPF.exe
+C:\Users\John\Documents\Kinect Program\fwdtsea56kodtillkinect\SkeletonBasics-WPF\obj\Debug\SkeletonBasics-WPF.pdb
+C:\Users\John\Source\Repos\datorenhet\SkeletonBasics-WPF\obj\Debug\SkeletonBasics-WPF.exe
+C:\Users\John\Source\Repos\datorenhet\SkeletonBasics-WPF\obj\Debug\SkeletonBasics-WPF.pdb
+C:\Users\John\Source\Repos\datorenhet\SkeletonBasics-WPF\bin\Debug\SkeletonBasics-WPF.exe
+C:\Users\John\Source\Repos\datorenhet\SkeletonBasics-WPF\bin\Debug\SkeletonBasics-WPF.pdb
+C:\Users\John\Source\Repos\datorenhet\SkeletonBasics-WPF\bin\Debug\Microsoft.Kinect.dll
+C:\Users\John\Source\Repos\datorenhet\SkeletonBasics-WPF\bin\Debug\Microsoft.Kinect.xml
+C:\Users\John\Source\Repos\datorenhet\SkeletonBasics-WPF\obj\Debug\SkeletonBasics-WPF.csprojResolveAssemblyReference.cache
+C:\Users\John\Source\Repos\datorenhet\SkeletonBasics-WPF\obj\Debug\MainWindow.baml
+C:\Users\John\Source\Repos\datorenhet\SkeletonBasics-WPF\obj\Debug\MainWindow.g.cs
+C:\Users\John\Source\Repos\datorenhet\SkeletonBasics-WPF\obj\Debug\App.g.cs
+C:\Users\John\Source\Repos\datorenhet\SkeletonBasics-WPF\obj\Debug\SkeletonBasics-WPF_MarkupCompile.cache
+C:\Users\John\Source\Repos\datorenhet\SkeletonBasics-WPF\obj\Debug\SkeletonBasics-WPF.g.resources
+C:\Users\John\Source\Repos\datorenhet\SkeletonBasics-WPF\obj\Debug\Microsoft.Samples.Kinect.SkeletonBasics.Properties.Resources.resources
+C:\Users\John\Source\Repos\datorenhet\SkeletonBasics-WPF\obj\Debug\SkeletonBasics-WPF.csproj.GenerateResource.Cache
+C:\Users\Marcus Homelius\Documents\Visual Studio 2015\datorenhet-405ffb6aff77b33d79020ac48ca6d0903e6ad774-405ffb6aff77b33d79020ac48ca6d0903e6ad774\SkeletonBasics-WPF\obj\Debug\SkeletonBasics-WPF.exe
+C:\Users\Marcus Homelius\Documents\Visual Studio 2015\datorenhet-405ffb6aff77b33d79020ac48ca6d0903e6ad774-405ffb6aff77b33d79020ac48ca6d0903e6ad774\SkeletonBasics-WPF\obj\Debug\SkeletonBasics-WPF.pdb
+C:\Users\Marcus Homelius\Documents\Visual Studio 2015\datorenhet-405ffb6aff77b33d79020ac48ca6d0903e6ad774-405ffb6aff77b33d79020ac48ca6d0903e6ad774\SkeletonBasics-WPF\bin\Debug\SkeletonBasics-WPF.exe
+C:\Users\Marcus Homelius\Documents\Visual Studio 2015\datorenhet-405ffb6aff77b33d79020ac48ca6d0903e6ad774-405ffb6aff77b33d79020ac48ca6d0903e6ad774\SkeletonBasics-WPF\bin\Debug\SkeletonBasics-WPF.pdb
+C:\Users\Marcus Homelius\Documents\Visual Studio 2015\datorenhet-405ffb6aff77b33d79020ac48ca6d0903e6ad774-405ffb6aff77b33d79020ac48ca6d0903e6ad774\SkeletonBasics-WPF\bin\Debug\Microsoft.Kinect.xml
+C:\Users\Marcus Homelius\Documents\Visual Studio 2015\datorenhet-405ffb6aff77b33d79020ac48ca6d0903e6ad774-405ffb6aff77b33d79020ac48ca6d0903e6ad774\SkeletonBasics-WPF\obj\Debug\SkeletonBasics-WPF.csprojResolveAssemblyReference.cache
+C:\Users\Marcus Homelius\Documents\Visual Studio 2015\datorenhet-405ffb6aff77b33d79020ac48ca6d0903e6ad774-405ffb6aff77b33d79020ac48ca6d0903e6ad774\SkeletonBasics-WPF\obj\Debug\MainWindow.baml
+C:\Users\Marcus Homelius\Documents\Visual Studio 2015\datorenhet-405ffb6aff77b33d79020ac48ca6d0903e6ad774-405ffb6aff77b33d79020ac48ca6d0903e6ad774\SkeletonBasics-WPF\obj\Debug\MainWindow.g.cs
+C:\Users\Marcus Homelius\Documents\Visual Studio 2015\datorenhet-405ffb6aff77b33d79020ac48ca6d0903e6ad774-405ffb6aff77b33d79020ac48ca6d0903e6ad774\SkeletonBasics-WPF\obj\Debug\App.g.cs
+C:\Users\Marcus Homelius\Documents\Visual Studio 2015\datorenhet-405ffb6aff77b33d79020ac48ca6d0903e6ad774-405ffb6aff77b33d79020ac48ca6d0903e6ad774\SkeletonBasics-WPF\obj\Debug\SkeletonBasics-WPF_MarkupCompile.cache
+C:\Users\Marcus Homelius\Documents\Visual Studio 2015\datorenhet-405ffb6aff77b33d79020ac48ca6d0903e6ad774-405ffb6aff77b33d79020ac48ca6d0903e6ad774\SkeletonBasics-WPF\obj\Debug\SkeletonBasics-WPF.g.resources
+C:\Users\Marcus Homelius\Documents\Visual Studio 2015\datorenhet-405ffb6aff77b33d79020ac48ca6d0903e6ad774-405ffb6aff77b33d79020ac48ca6d0903e6ad774\SkeletonBasics-WPF\obj\Debug\Microsoft.Samples.Kinect.SkeletonBasics.Properties.Resources.resources
+C:\Users\Marcus Homelius\Documents\Visual Studio 2015\datorenhet-405ffb6aff77b33d79020ac48ca6d0903e6ad774-405ffb6aff77b33d79020ac48ca6d0903e6ad774\SkeletonBasics-WPF\obj\Debug\SkeletonBasics-WPF.csproj.GenerateResource.Cache
+C:\Users\Marcus Homelius\Documents\Visual Studio 2015\datorenhet-405ffb6aff77b33d79020ac48ca6d0903e6ad774-405ffb6aff77b33d79020ac48ca6d0903e6ad774\SkeletonBasics-WPF\bin\Debug\Microsoft.Kinect.dll
+C:\Users\Marcus Homelius\Source\Repos\datorenhet\SkeletonBasics-WPF\obj\Debug\SkeletonBasics-WPF.exe
+C:\Users\Marcus Homelius\Source\Repos\datorenhet\SkeletonBasics-WPF\obj\Debug\SkeletonBasics-WPF.pdb
+C:\Users\Marcus Homelius\Source\Repos\datorenhet\SkeletonBasics-WPF\bin\Debug\SkeletonBasics-WPF.exe
+C:\Users\Marcus Homelius\Source\Repos\datorenhet\SkeletonBasics-WPF\bin\Debug\SkeletonBasics-WPF.pdb
+C:\Users\Marcus Homelius\Source\Repos\datorenhet\SkeletonBasics-WPF\bin\Debug\Microsoft.Kinect.dll
+C:\Users\Marcus Homelius\Source\Repos\datorenhet\SkeletonBasics-WPF\bin\Debug\Microsoft.Kinect.xml
+C:\Users\Marcus Homelius\Source\Repos\datorenhet\SkeletonBasics-WPF\obj\Debug\SkeletonBasics-WPF.csprojResolveAssemblyReference.cache
+C:\Users\Marcus Homelius\Source\Repos\datorenhet\SkeletonBasics-WPF\obj\Debug\MainWindow.baml
+C:\Users\Marcus Homelius\Source\Repos\datorenhet\SkeletonBasics-WPF\obj\Debug\MainWindow.g.cs
+C:\Users\Marcus Homelius\Source\Repos\datorenhet\SkeletonBasics-WPF\obj\Debug\App.g.cs
+C:\Users\Marcus Homelius\Source\Repos\datorenhet\SkeletonBasics-WPF\obj\Debug\SkeletonBasics-WPF_MarkupCompile.cache
+C:\Users\Marcus Homelius\Source\Repos\datorenhet\SkeletonBasics-WPF\obj\Debug\SkeletonBasics-WPF.g.resources
+C:\Users\Marcus Homelius\Source\Repos\datorenhet\SkeletonBasics-WPF\obj\Debug\Microsoft.Samples.Kinect.SkeletonBasics.Properties.Resources.resources
+C:\Users\Marcus Homelius\Source\Repos\datorenhet\SkeletonBasics-WPF\obj\Debug\SkeletonBasics-WPF.csproj.GenerateResource.Cache
+C:\Users\Marcus Homelius\Source\Repos\datorenhet\SkeletonBasics-WPF\obj\Debug\Microsoft.Samples.Kinect.SkeletonBasics.Popup.resources
+C:\Users\Marcus Homelius\Source\Repos\datorenhet\SkeletonBasics-WPF\bin\Debug\Microsoft.DirectX.DirectInput.dll
+C:\Users\Marcus Homelius\Source\Repos\datorenhet\SkeletonBasics-WPF\bin\Debug\Microsoft.DirectX.dll
+C:\Users\Marcus Homelius\Source\Repos\datorenhet\SkeletonBasics-WPF\bin\Debug\Microsoft.DirectX.xml
+C:\Users\Marcus Homelius\Source\Repos\datorenhet\SkeletonBasics-WPF\bin\Debug\Microsoft.DirectX.DirectInput.xml
+C:\Users\Marcus Homelius\Source\Repos\datorenhet\SkeletonBasics-WPF\bin\Debug\SlimDX.pdb
+C:\Users\Marcus Homelius\Source\Repos\datorenhet\SkeletonBasics-WPF\bin\Debug\SlimDX.xml
+C:\Users\Jacob\Desktop\Projekt\SkeletonBasics-WPF\obj\Debug\SkeletonBasics-WPF.exe
+C:\Users\Jacob\Desktop\Projekt\SkeletonBasics-WPF\obj\Debug\SkeletonBasics-WPF.pdb
+C:\Users\Jacob\Desktop\Projekt\SkeletonBasics-WPF\bin\Debug\SkeletonBasics-WPF.exe
+C:\Users\Jacob\Desktop\Projekt\SkeletonBasics-WPF\bin\Debug\SkeletonBasics-WPF.pdb
+C:\Users\Jacob\Desktop\Projekt\SkeletonBasics-WPF\bin\Debug\Microsoft.DirectX.DirectInput.dll
+C:\Users\Jacob\Desktop\Projekt\SkeletonBasics-WPF\bin\Debug\Microsoft.DirectX.dll
+C:\Users\Jacob\Desktop\Projekt\SkeletonBasics-WPF\bin\Debug\Microsoft.Kinect.dll
+C:\Users\Jacob\Desktop\Projekt\SkeletonBasics-WPF\bin\Debug\Microsoft.DirectX.xml
+C:\Users\Jacob\Desktop\Projekt\SkeletonBasics-WPF\bin\Debug\Microsoft.DirectX.DirectInput.xml
+C:\Users\Jacob\Desktop\Projekt\SkeletonBasics-WPF\bin\Debug\Microsoft.Kinect.xml
+C:\Users\Jacob\Desktop\Projekt\SkeletonBasics-WPF\bin\Debug\SlimDX.pdb
+C:\Users\Jacob\Desktop\Projekt\SkeletonBasics-WPF\bin\Debug\SlimDX.xml
+C:\Users\Jacob\Desktop\Projekt\SkeletonBasics-WPF\obj\Debug\SkeletonBasics-WPF.csprojResolveAssemblyReference.cache
+C:\Users\Jacob\Desktop\Projekt\SkeletonBasics-WPF\obj\Debug\MainWindow.baml
+C:\Users\Jacob\Desktop\Projekt\SkeletonBasics-WPF\obj\Debug\MainWindow.g.cs
+C:\Users\Jacob\Desktop\Projekt\SkeletonBasics-WPF\obj\Debug\App.g.cs
+C:\Users\Jacob\Desktop\Projekt\SkeletonBasics-WPF\obj\Debug\SkeletonBasics-WPF_MarkupCompile.cache
+C:\Users\Jacob\Desktop\Projekt\SkeletonBasics-WPF\obj\Debug\SkeletonBasics-WPF.g.resources
+C:\Users\Jacob\Desktop\Projekt\SkeletonBasics-WPF\obj\Debug\Microsoft.Samples.Kinect.SkeletonBasics.Popup.resources
+C:\Users\Jacob\Desktop\Projekt\SkeletonBasics-WPF\obj\Debug\Microsoft.Samples.Kinect.SkeletonBasics.Properties.Resources.resources
+C:\Users\Jacob\Desktop\Projekt\SkeletonBasics-WPF\obj\Debug\SkeletonBasics-WPF.csproj.GenerateResource.Cache
+C:\Users\Jacob\Desktop\Projekt\SkeletonBasics-WPF\obj\Debug\Interop.MLApp.dll
+C:\Users\Jacob\Desktop\Projekt\SkeletonBasics-WPF\obj\Debug\SkeletonBasics-WPF.csproj.ResolveComReference.cache
+C:\Users\Marcus Homelius\Source\Repos\datorenhet\SkeletonBasics-WPF\obj\Debug\SkeletonBasics-WPF.csproj.ResolveComReference.cache

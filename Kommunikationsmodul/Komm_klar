@@ -1,0 +1,345 @@
+/*
+ * Kommunikationsmodul_test.cpp
+ *
+ * Created: 4/2/2016 5:14:27 PM
+ *  Author: marhi386
+ */ 
+
+
+//Sätt till rätt hastighet
+#ifndef F_CPU
+#define F_CPU 14745600UL
+#endif
+
+
+// Definiera BAUD
+#define BAUD 115200UL
+
+//#define BAUD 101077UL
+//#define BAUD 201600UL //FULLÖSNING
+// Sätt Baudratevärde för UBRR
+#define BAUDRATE ((F_CPU)/(BAUD*16UL)-1)
+
+
+#include <avr/io.h>
+#include <avr/interrupt.h>
+#include <util/delay.h>
+#include <stdlib.h>
+#include <util/setbaud.h>
+#include <string.h>
+
+//*********Global Variabel************************************
+
+//UART
+const uint8_t uart_buffer_max = 20; //Storlek på buffer
+volatile uint8_t uart_buffer[uart_buffer_max]; //Buffer där senast mottagna datan ligger
+volatile uint8_t uart_ctr = 0; // håller reda på var i buffern vi är
+volatile bool uart_rx_flag = false; //true om vi fått ett nytt värde i buffern
+
+//SPI
+
+//Sens
+const uint8_t spi_sensBuffer_max = 20;
+volatile uint8_t spi_sensbuffer[spi_sensBuffer_max];
+volatile uint8_t spi_sensCtr = 0;
+volatile bool spi_sensRx_flag = false;
+
+//Styr
+const uint8_t spi_controlBuffer_max = 20;
+volatile uint8_t spi_controlBuffer[spi_controlBuffer_max];
+volatile uint8_t spi_controlCtr = 0;
+volatile bool spi_controlRx_flag = false;
+
+//*********INIT-funktioner************************************
+
+//TEST INIT
+void test_init()
+{
+	DDRA = 0xff;
+}
+
+// Funktion för att initiera UART
+void uart_init()
+{
+	// Skifta registret höger 8 bitar
+	UBRRH = (BAUDRATE>>8);
+
+	// Sätt baudrate
+	UBRRL = BAUDRATE;
+
+	// Aktivera mottagare och sändare
+	UCSRB|= (1<<TXEN)|(1<<RXEN)|(1<<RXCIE);
+
+	// Välj 8-bitars dataformat
+	UCSRC|= (1<<URSEL)|(1<<UCSZ1)|(1<<UCSZ0);
+}
+
+// Initiera Masterenhet
+void spi_init_master()
+{
+	// Sätt MOSI, SCK, SS0(styr) och SS1(sens) som output
+	DDRB = (1<<5)|(1<<7)|(1<<4)|(1<<0);
+	
+	// Aktivera SPI, Sätt till Master
+	//SCK-frekvens: Fosc/16
+	SPCR = (1<<SPE)|(1<<MSTR)|(1<<SPR0)|(1<<SPR1); 
+	
+	MCUCR |= (1<<1)|(1<<3); //Sätt negativ flank
+	GICR |= (1<<INT0)|(1<<INT1); //Aktivera avbrott int0, int1
+}
+
+//***************BUSS*****************************
+
+// Funktion för att skicka data
+void uart_sendChar(unsigned char data)
+{
+	// Vänta tills registret är ledigt
+	while (!( UCSRA & (1<<UDRE)));
+
+	// Ladda in data i registret
+	UDR = data;
+}
+
+void uart_sendString(const char *string, int delay)
+{
+	while(*string)
+	{
+		uart_sendChar(*string++);
+		while(delay > 0)
+		{
+			_delay_ms(1);
+			delay--;
+		}
+	}
+}
+
+// Funktion för att ta emot data
+unsigned char uart_readChar()
+{
+	// Vänta tills data har mottagits
+	while(!(UCSRA) & (1<<RXC));
+	
+	// Returnera 8 bitar data
+	return UDR;
+}
+
+////////////SPI//////////////////////
+
+void select_slave(int slave_nr)
+{
+	if (slave_nr == 2) //Ingen
+	{
+		PORTB |= (1<<4)|(1<<0);
+	}
+	else if (slave_nr == 1) //Styr
+	{
+		PORTB &= ~(1<<0);
+		PORTB |= 1<<4;
+	}
+	else if (slave_nr == 0) //Sens
+	{
+		PORTB &= ~(1<<4);
+		PORTB |= 1<<0;
+	}
+}
+
+//Funktion för att skicka och ta emot 8 bitar
+unsigned char spi_WriteRead_char (unsigned char data, int slave_nr)
+{
+	//sens = 0, styr = 1, ingen = 2
+	select_slave(slave_nr);
+	//Ladda in data som ska skickas
+	SPDR = data;
+	
+	//Vänta tills överföring är klar
+	while(!(SPSR &(1<<SPIF) ));
+	
+	//Returnera mottagen data
+	return(SPDR);
+	select_slave(2); //koppla från
+}
+
+////////Tolka kommandon//////////
+void uart_process()
+{
+	switch(uart_buffer[uart_ctr-1]) //Om kommandot vi fick in va...
+	{
+		// '!' nollstället buffer-räknaren, kan va bra om man inte längre bryr sig om det gamla i buffern
+		case '!': uart_ctr = 0;
+		break;
+		
+		////////Robotens rörelse///////////
+		
+		//Kör frammåt
+		case 'U':
+		spi_WriteRead_char('U', 1); 
+		uart_sendChar('U');
+		uart_ctr = 0;
+		break;
+		
+		//kör bakåt
+		case 'D':
+		spi_WriteRead_char('D', 1); 
+		uart_sendChar('D');
+		uart_ctr = 0;
+		break; 
+		
+		//Stop
+		case 'S':
+		spi_WriteRead_char('S', 1); 
+		uart_sendChar('S');
+		uart_ctr = 0;
+		break;
+		
+		//Vänster
+		case 'L':
+		spi_WriteRead_char('L', 1); 
+		uart_sendChar('L');
+		uart_ctr = 0;
+		break;
+		
+		//Höger
+		case 'R':
+		spi_WriteRead_char('R', 1); 
+		uart_sendChar('R');
+		uart_ctr = 0;
+		break;
+		
+		//Rotera vänster
+		case 'F':
+		spi_WriteRead_char('F', 1); 
+		uart_sendChar('F');
+		uart_ctr = 0;
+		break;
+		
+		//Rotera höger
+		case 'G':
+		spi_WriteRead_char('G', 1); 
+		uart_sendChar('G');
+		uart_ctr = 0;
+		break;		
+		
+		/////////////////////////////////////
+	}
+}
+
+void spi_sensProcess()
+{
+	switch(spi_sensbuffer[spi_sensCtr-1])
+	{
+		case '!':
+		spi_sensCtr = 0;
+		break;
+		
+		case 'B':
+		PORTA = 0xff;
+		uart_sendChar('B');
+		spi_sensCtr = 0;
+		break;
+	}
+}
+
+void spi_controlProcess()
+{
+	uart_sendChar(spi_controlBuffer[spi_controlCtr]);
+	switch(spi_controlBuffer[spi_controlCtr-1])
+	{
+		case '!':
+		spi_controlCtr = 0;
+		break;
+		
+		case 'A':
+		PORTA = 0x0f;
+		spi_WriteRead_char('B', 1);
+		spi_sensCtr = 0;
+		break;
+	}
+}
+
+//******************Fråga efter data från slavar**********
+
+//Be sens att skicka sensordata
+void get_sensorData()
+{
+	unsigned char command = 'G';
+	spi_WriteRead_char(command, 0);
+}
+
+//******************Avbrottsrutiner***********************
+ISR(USART_RXC_vect)
+{
+	if(uart_ctr == uart_buffer_max) // Är bufferräknaren vid max, nollställ
+	{
+		uart_ctr = 0;
+	}
+	uart_buffer[uart_ctr++] = UDR;	
+	uart_rx_flag = true;	
+}
+
+//Avbrott från sens
+ISR(INT0_vect)
+{
+	if(spi_sensCtr == spi_sensBuffer_max) // Är bufferräknaren vid max, nollställ
+	{
+		spi_sensCtr = 0;
+	}
+	spi_sensbuffer[spi_sensCtr++] = spi_WriteRead_char('!', 0);
+	spi_sensRx_flag = true;
+}
+
+//Avbrott från styr
+ISR(INT1_vect)
+{
+	if(spi_controlCtr == spi_controlBuffer_max) // Är bufferräknaren vid max, nollställ
+	{
+		spi_controlCtr = 0;
+	}
+	spi_controlBuffer[spi_controlCtr++] = spi_WriteRead_char('!', 1);
+	spi_controlRx_flag = true;
+}
+
+
+//********************************************************
+
+void delay(int time)
+{
+	while (time > 0)
+	{
+		time--;
+		delay(1);
+	}
+}
+
+//******************MAIN**********************************
+// SS: 1 = styr, 0 = sens
+int main(void)
+{	
+	spi_init_master();
+    uart_init();
+	test_init();
+	
+	sei();
+	
+	_delay_ms(1000);
+	//spi_WriteRead_char('A', 0);
+	
+	while(1)
+    {
+		if (uart_rx_flag)// Om vi mottagit data via uart
+		{
+			uart_process();
+			uart_rx_flag = false;
+		}			
+		if (spi_sensRx_flag)
+		{
+			spi_sensProcess();
+			spi_sensRx_flag = false;
+		}
+		if (spi_controlRx_flag)
+		{	
+			spi_controlProcess();
+			spi_controlRx_flag = false;
+		}
+	}
+}
+

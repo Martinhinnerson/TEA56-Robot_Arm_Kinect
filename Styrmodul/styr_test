@@ -1,0 +1,188 @@
+/*
+ * Styrmodul.cpp
+ *
+ * Created: 2016-03-31 13:16:13
+ *  Author: Martin
+ */ 
+
+
+// Definiera BAUD
+#define BAUD 9600
+// Sätt Baudratevärde för UBRR
+#define BAUDRATE ((F_CPU)/(BAUD*16UL)-1)
+
+
+//Sätt till rätt hastighet
+#ifndef F_CPU
+#define F_CPU 16000000UL
+#endif
+
+#include <avr/io.h>
+#include <avr/interrupt.h>
+#include <util/delay.h>
+#include <stdlib.h>
+#include <util/setbaud.h>
+#include <string.h>
+
+//*********Globala variabler*************
+
+//Drive = 1, Arm = 2, Test = 3
+int mode = 3; //KÖRLÄGE
+
+char sensorData_new; //UART
+
+//SPI
+const int maxBytes = 8; //Maxlängd på command 8 chars
+uint8_t data_recieved[maxBytes];
+uint8_t command_recieved[maxBytes]; 
+uint8_t data_number = 0;
+bool recieve_complete;
+
+//*********INIT-funktioner************************************
+
+//TEST INIT
+void test_init()
+{
+	DDRA = 0xff; //output
+}
+
+
+// Funktion för att initiera UART
+void uart_init (void)
+{
+	// Skifta registret höger 8 bitar
+	UBRR0H = (BAUDRATE<<8);
+
+	// Sätt baudrate
+	UBRR0L = BAUDRATE;
+
+	// Aktivera mottagare och sändare
+	UCSR0B|= (1<<TXEN0)|(1<<RXEN0)|(1<<RXCIE0);
+	
+	// Välj 8-bitars dataformat
+	UCSR0C|= (1<<UCSZ01)|(1<<UCSZ00);
+}
+
+// Initiera Slavenhet
+void spi_init_slave (void)
+{
+	DDRB = (1<<6); //MISO till OUTPUT
+	SPCR = (1<<SPE)|(1<<SPIE); //Aktivera SPI och avbrott
+	SPDR = 0; //Tömm dataregister
+}
+
+//***************Övriga funktioner*******************************
+
+// Funktion för att skicka data
+void uart_Write (unsigned char data)
+{
+	// Vänta tills registret är ledigt
+	while (!( UCSR0A & (1<<UDRE0)));
+
+	// Ladda in data i registret
+	UDR0 = data;
+}
+
+// Funktion för att ta emot data
+unsigned char uart_Read (void)
+{
+	// Vänta tills data har mottagits
+	while(!(UCSR0A) & (1<<RXC0));
+
+	// Returnera 8 bitar data
+	return UDR0;
+}
+
+
+//Funktion för att skicka och ta emot data för master och slave
+unsigned char spi_WriteRead (unsigned char data)
+{
+	//Ladda in data som ska skickas
+	SPDR = data;
+	
+	//Vänta tills överföring är klar
+	while(!(SPSR &(1<<SPIF) ));
+	
+	//Returnera mottagen data
+	return(SPDR);
+}
+
+void readCommand(uint8_t command[])
+{
+	switch(command[0])
+	{
+		case 'D': mode = 1;
+		break;
+				//IMPLEMENTERA!!!!!!!!!!!!!!!		
+	}
+}
+
+//******************Avbrottsrutiner***********************
+ISR(SPI_STC_vect) //SPI
+{
+	data_recieved[data_number] = SPDR;
+	
+	if (data_recieved[data_number] == '\n')
+	{
+		recieve_complete = true;
+		data_number = 0;
+	}
+	else
+	{
+		data_number++;
+	}
+}
+
+ISR(USART0_RX_vect) //UART
+{
+	sensorData_new = UDR0;
+}
+
+//******************MAIN***********************************
+int main(void)
+{
+	spi_init_slave();
+    uart_init();
+	test_init();
+	
+	sei();
+	while(1)
+    {
+		if (mode == 1) //DRIVE LOOP
+		{				
+			// Kolla om ett helt kommando har mottagits	
+			if (recieve_complete)
+			{
+				memcpy(command_recieved, data_recieved, sizeof(command_recieved));
+				for (int i = 0; i < maxBytes; ++i)
+				{
+					data_recieved[i] = 0;
+				}					
+				recieve_complete = false;
+
+				readCommand(command_recieved);
+			}
+			
+
+		}	
+		else if (mode == 3)
+		{
+			switch (sensorData_new)
+			{
+				case 0x00:
+					PORTA = 0xff;
+					_delay_ms(100);
+					PORTA = 0x00;
+					_delay_ms(100);
+				break;
+				case 0x01:
+					PORTA = 0xff;
+					_delay_ms(500);
+					PORTA = 0x00;
+					_delay_ms(500);
+				default: PORTA = 0x00;
+			}
+		}			
+    }
+}
+

@@ -1,0 +1,157 @@
+﻿<Window x:Class="Microsoft.Samples.Kinect.SkeletonBasics.MainWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        Title="WidowMaker" Height="603.333" Width="1300" Loaded="WindowLoaded" Closing="WindowClosing" KeyDown="Window_KeyDown">
+
+    <Window.Resources>
+        <SolidColorBrush x:Key="MediumGreyBrush" Color="#ff6e6e6e"/>
+        <SolidColorBrush x:Key="KinectPurpleBrush" Color="#ff52318f"/>
+        <SolidColorBrush x:Key="KinectBlueBrush" Color="#ff00BCF2"/>
+        <Style TargetType="{x:Type Image}">
+            <Setter Property="SnapsToDevicePixels" Value="True"/>
+        </Style>
+        <Style TargetType="{x:Type CheckBox}" x:Key="SquareCheckBox" >
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="{x:Type CheckBox}">
+                        <Grid>
+                            <StackPanel Orientation="Horizontal" Background="Transparent">
+                                <Grid x:Name="SquareCheckBoxChecked">
+                                    <Image x:Name="CheckedNormal" Source="Images\CheckedNormal.png" Stretch="None" HorizontalAlignment="Center"/>
+                                    <Image x:Name="CheckedHover" Source="Images\CheckedHover.png" Stretch="None" HorizontalAlignment="Center" Visibility="Collapsed"/>
+                                </Grid>
+                                <Grid x:Name="SquareCheckBoxUnchecked" Visibility="Collapsed">
+                                    <Image x:Name="UncheckedNormal" Source="Images\UncheckedNormal.png" Stretch="None" HorizontalAlignment="Center"/>
+                                    <Image x:Name="UncheckedHover" Source="Images\UncheckedHover.png" Stretch="None" HorizontalAlignment="Center" Visibility="Collapsed"/>
+                                </Grid>
+                                <TextBlock x:Name="SquareCheckBoxText" Text="{TemplateBinding Content}" TextAlignment="Left"  VerticalAlignment="Center" Foreground="{StaticResource KinectPurpleBrush}" FontSize="15"  Margin="9,0,0,0"/>
+                            </StackPanel>
+                        </Grid>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsChecked" Value="false">
+                                <Setter Property="Visibility" Value="Collapsed" TargetName="SquareCheckBoxChecked"/>
+                                <Setter Property="Visibility" Value="Visible" TargetName="SquareCheckBoxUnchecked"/>
+                            </Trigger>
+                            <Trigger Property="IsMouseOver" Value="true">
+                                <Setter Property="Visibility" Value="Collapsed" TargetName="CheckedNormal"/>
+                                <Setter Property="Visibility" Value="Collapsed" TargetName="UncheckedNormal"/>
+                                <Setter Property="Visibility" Value="Visible" TargetName="CheckedHover"/>
+                                <Setter Property="Visibility" Value="Visible" TargetName="UncheckedHover"/>
+                                <Setter Property="Foreground" Value="{StaticResource KinectBlueBrush}" TargetName="SquareCheckBoxText"/>
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+    </Window.Resources>
+
+    <Grid Name="layoutGrid" Margin="10,0,10,-20" RenderTransformOrigin="0.5,0.5">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto" MinHeight="24"/>
+            <RowDefinition/>
+        </Grid.RowDefinitions>
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width='426*'/>
+            <ColumnDefinition Width="197*"/>
+            <ColumnDefinition Width="224*"/>
+            <ColumnDefinition Width="427*"/>
+        </Grid.ColumnDefinitions>
+        <DockPanel Grid.Row="0" Margin="0,0,3,20"/>
+        <Viewbox Grid.Row="1" Grid.Column="0" Stretch="Uniform" HorizontalAlignment="Left" Width="438" VerticalAlignment="Top" Height="377" Margin="0,10,0,0" Grid.ColumnSpan="2">
+            <Image Name="Image" Width="65" Height="56" RenderTransformOrigin="0.5,0.5" HorizontalAlignment="Left" VerticalAlignment="Top"/>
+        </Viewbox>
+        <CheckBox Grid.Row="1" Style="{StaticResource SquareCheckBox}" Content="Seated Mode" Height="40" VerticalAlignment="Top" Margin="10,469,0,0" Name="checkBoxSeatedMode" Checked="CheckBoxSeatedModeChanged" Unchecked="CheckBoxSeatedModeChanged" RenderTransformOrigin="0.446,-1.28" HorizontalAlignment="Left" Width="140"/>
+        <StatusBarItem Padding="0 0 0 10" Height="26" VerticalAlignment="Top" Margin="0,8,3,0" Grid.RowSpan="2">
+            <TextBlock x:Name="statusBarText" TextWrapping="Wrap" Text="Status"/>
+        </StatusBarItem>
+        <CheckBox Grid.Row="1" Style="{StaticResource SquareCheckBox}" Content="Near Mode" Height="40" VerticalAlignment="Top" Margin="10,422,0,0" x:Name="checkBoxNearMode" Checked="CheckBoxSeatedModeChanged" Unchecked="CheckBoxSeatedModeChanged" RenderTransformOrigin="0.446,-1.28" HorizontalAlignment="Left" Width="140"/>
+        <Button x:Name="ConnectionButton" Content="Connect" HorizontalAlignment="Left" Height="39" Margin="286,424,0,0" Grid.Row="1" VerticalAlignment="Top" Width="86" Click="ConnectionButton_Click" IsEnabled="False"/>
+        <TextBlock x:Name="rightHandStatus" Grid.Column="1" HorizontalAlignment="Left" Height="65" TextWrapping="Wrap" Text="Right Hand: Unkown" VerticalAlignment="Top" Width="155" Margin="23,4,0,0" Grid.Row="1"/>
+        <TextBlock x:Name="rightElbowStatus" Grid.Column="1" HorizontalAlignment="Left" Height="65" Margin="23,135,0,0" Grid.Row="1" TextWrapping="Wrap" Text="Right Elbow: Unkown" VerticalAlignment="Top" Width="155"/>
+        <TextBlock x:Name="rightShoulderStatus" Grid.Column="1" HorizontalAlignment="Left" Height="65" Margin="23,205,0,0" Grid.Row="1" TextWrapping="Wrap" Text="Right Shoulder: Unkown" VerticalAlignment="Top" Width="155"/>
+        <ComboBox x:Name="BlueToothConnections" HorizontalAlignment="Left" Height="20" Margin="200,487,0,0" Grid.Row="1" VerticalAlignment="Top" Width="172"/>
+        <Button x:Name="SearchButton" Content="Search" HorizontalAlignment="Left" Height="39" Margin="200,424,0,0" Grid.Row="1" VerticalAlignment="Top" Width="79" Click="SearchButton_Click"/>
+        <TextBlock x:Name="rightWristStatus" Grid.Column="1" HorizontalAlignment="Left" Height="65" Margin="23,70,0,0" TextWrapping="Wrap" Text="Right Wrist: Unkown" VerticalAlignment="Top" Width="155" Grid.Row="1"/>
+        <TextBox x:Name="Angle1" HorizontalAlignment="Left" Height="23" Margin="91.333,160,0,0" Grid.Row="1" TextWrapping="Wrap" Text="" VerticalAlignment="Top" Width="68" Grid.Column="2"/>
+        <TextBox x:Name="Angle2" HorizontalAlignment="Left" Height="23" Margin="91.333,183,0,0" Grid.Row="1" TextWrapping="Wrap" Text="" VerticalAlignment="Top" Width="68" Grid.Column="2"/>
+        <TextBox x:Name="Angle3" HorizontalAlignment="Left" Height="23" Margin="91.333,206,0,0" Grid.Row="1" TextWrapping="Wrap" Text="" VerticalAlignment="Top" Width="68" Grid.Column="2"/>
+        <TextBox x:Name="Angle4" HorizontalAlignment="Left" Height="23" Margin="91.333,229,0,0" Grid.Row="1" TextWrapping="Wrap" Text="" VerticalAlignment="Top" Width="68" Grid.Column="2"/>
+
+        <Label x:Name="label_1" Content="Speed" Grid.Column="2" HorizontalAlignment="Left" Margin="32.333,160,0,0" Grid.Row="1" VerticalAlignment="Top" Height="28" Width="71"/>
+        <Label x:Name="label_2" Content="P" Grid.Column="2" HorizontalAlignment="Left" Margin="49.333,181,0,0" Grid.Row="1" VerticalAlignment="Top" Height="23" Width="26"/>
+        <Label x:Name="label_3" Content="I" Grid.Column="2" HorizontalAlignment="Left" Margin="49.333,206,0,0" Grid.Row="1" VerticalAlignment="Top" Height="23" Width="26"/>
+        <Label x:Name="label_4" Content="D" Grid.Column="2" HorizontalAlignment="Left" Margin="49.333,229,0,0" Grid.Row="1" VerticalAlignment="Top" Height="23" Width="26"/>
+        <Button x:Name="Send" Content="Send" HorizontalAlignment="Left" Height="22" Margin="87.333,282,0,0" Grid.Row="1" VerticalAlignment="Top" Width="59" Click="Send_Click" RenderTransformOrigin="0.394,0.045" Grid.Column="2"/>
+        <Border BorderBrush="Black" BorderThickness="1" Grid.Column="2" HorizontalAlignment="Left" Height="211" Margin="9.333,321,0,0" Grid.Row="1" VerticalAlignment="Top" Width="212"/>
+        <Button x:Name="Stop_Button" Content="Stop" HorizontalAlignment="Left" VerticalAlignment="Top" Width="59" Height="53" Click="Stop_button_Click" Margin="87.333,407,0,0" Grid.Column="2" Grid.Row="1" Background="Crimson"/>
+        <Button x:Name="Forward_button" Content="Forward" Grid.Column="2" HorizontalAlignment="Left" Margin="87.333,349,0,0" Grid.Row="1" VerticalAlignment="Top" Width="59" Height="53" Click="Forward_button_Click"/>
+        <Button x:Name="Backward_button" Content="Backward" Grid.Column="2" HorizontalAlignment="Left" Margin="87.333,464,0,0" Grid.Row="1" VerticalAlignment="Top" Width="59" Height="53" Click="Backward_button_Click"/>
+        <Button x:Name="Right_button" Content="Right" Grid.Column="2" HorizontalAlignment="Left" Margin="151.333,407,0,0" Grid.Row="1" VerticalAlignment="Top" Width="56" Height="53" Click="Right_button_Click"/>
+        <Button x:Name="Left_Button" Content="Left" Grid.Column="2" HorizontalAlignment="Left" Margin="24.333,407,0,0" Grid.Row="1" VerticalAlignment="Top" Width="58" Height="53" Click="Left_Button_Click"/>
+        <Button x:Name="Rotate_Left_Button" Content="Rotate" Grid.Column="2" HorizontalAlignment="Left" Margin="24.333,349,0,0" Grid.Row="1" VerticalAlignment="Top" Width="58" Height="53" Click="Rotate_Left_Button_Click"/>
+        <Button x:Name="Rotate_Right_Button" Content="Rotate" Grid.Column="2" HorizontalAlignment="Left" Margin="151.333,349,0,0" Grid.Row="1" VerticalAlignment="Top" Width="56" Height="53" Click="Rotate_Right_Button_Click"/>
+        <TextBox x:Name="textBox_Terminal" Grid.Column="3" HorizontalAlignment="Left" Height="294" Margin="154.333,22,0,0" Grid.Row="1" TextWrapping="Wrap" Text="" VerticalAlignment="Top" Width="261" AcceptsReturn="True" AcceptsTab="True" IsReadOnly="True" TextChanged="textBox_Terminal_TextChanged" Background="Black" Foreground="LightGreen"/>
+        <Border BorderBrush="Black" BorderThickness="1" Grid.Column="3" HorizontalAlignment="Left" Height="211" Margin="1.333,321,0,0" Grid.Row="1" VerticalAlignment="Top" Width="422"/>
+        <Button x:Name="Platform_Left_Button" Content="Left (T)" HorizontalAlignment="Left" VerticalAlignment="Top" Width="58" Height="42" Click="Platform_Left_Button_Click" Margin="11.333,376,0,0" Grid.Column="3" Grid.Row="1" RenderTransformOrigin="0.58,3.079"/>
+        <Button x:Name="Platform_Right_Button" Content="Right (Y)" Grid.Column="3" HorizontalAlignment="Left" Margin="11.333,429,0,0" Grid.Row="1" VerticalAlignment="Top" Width="58" Height="42" Click="Platform_Right_button_Click" RenderTransformOrigin="0.536,1.81"/>
+        <Button x:Name="Shoulder_Up_Button" Content="Up (U)" Grid.Column="3" HorizontalAlignment="Left" Margin="80.333,376,0,0" Grid.Row="1" VerticalAlignment="Top" Width="58" Height="42" Click="Shoulder_Up_button_Click"/>
+        <Button x:Name="Shoulder_Down_Button" Content="Down (I)" Grid.Column="3" HorizontalAlignment="Left" Margin="80.333,429,0,0" Grid.Row="1" VerticalAlignment="Top" Width="58" Height="42" Click="Shoulder_Down_button_Click"/>
+        <Button x:Name="Turn_off_Button" Content="Turn off" Grid.Column="3" HorizontalAlignment="Left" Margin="145.333,480,0,0" Grid.Row="1" VerticalAlignment="Top" Width="126" Height="42" Click="Turn_off_button_Click" RenderTransformOrigin="1.587,0.798"/>
+        <Button x:Name="Start_position_Button" Content="Start position" Grid.Column="3" HorizontalAlignment="Left" Margin="11.333,479,0,0" Grid.Row="1" VerticalAlignment="Top" Width="127" Height="42" Click="Start_position_button_Click" RenderTransformOrigin="1.587,0.798"/>
+        <Button x:Name="Wrist_Up_Button" Content="Up (J)" Grid.Column="3" HorizontalAlignment="Left" Margin="213.333,376,0,0" Grid.Row="1" VerticalAlignment="Top" Width="58" Height="42" Click="Wrist_Up_button_Click"/>
+        <Button x:Name="Elbow_Up_Button" Content="Up (G)" Grid.Column="3" HorizontalAlignment="Left" Margin="145.333,376,0,0" Grid.Row="1" VerticalAlignment="Top" Width="58" Height="42" Click="Elbow_Up_button_Click"/>
+        <Button x:Name="Elbow_Down_Button" Content="Down (H)" Grid.Column="3" HorizontalAlignment="Left" Margin="145.333,429,0,0" Grid.Row="1" VerticalAlignment="Top" Width="58" Height="42" Click="Elbow_Down_button_Click"/>
+        <Button x:Name="Wrist_Down_Button" Content="Down (K)" Grid.Column="3" HorizontalAlignment="Left" Margin="213.333,429,0,0" Grid.Row="1" VerticalAlignment="Top" Width="58" Height="42" Click="Wrist_Down_button_Click"/>
+        <Label  Content="Platform&#xD;(rotate)" Grid.Column="3" HorizontalAlignment="Left" Margin="22.333,329,0,0" Grid.Row="1" VerticalAlignment="Top" Height="55" Width="58"/>
+        <Label  Content="Shoulder" Grid.Column="3" HorizontalAlignment="Left" Margin="80.333,329,0,0" Grid.Row="1" VerticalAlignment="Top" Height="23" Width="58"/>
+        <Label  Content="Elbow" Grid.Column="3" HorizontalAlignment="Left" Margin="154.333,329,0,0" Grid.Row="1" VerticalAlignment="Top" Height="23" Width="58"/>
+        <Label  Content="Wrist" Grid.Column="3" HorizontalAlignment="Left" Margin="222.333,329,0,0" Grid.Row="1" VerticalAlignment="Top" Height="23" Width="58"/>
+        <Button x:Name="Hand_Left_Button" Content="Left (V)" HorizontalAlignment="Left" VerticalAlignment="Top" Width="58" Height="42" Click="Hand_Left_Button_Click" Margin="276.333,376,0,0" Grid.Column="3" Grid.Row="1" RenderTransformOrigin="0.58,3.079"/>
+        <Button x:Name="Hand_Right_Button" Content="Right (B)" Grid.Column="3" HorizontalAlignment="Left" Margin="276.333,429,0,0" Grid.Row="1" VerticalAlignment="Top" Width="58" Height="42" Click="Hand_Right_button_Click" RenderTransformOrigin="0.536,1.81"/>
+        <Label  Content="Hand&#xA;(rotate)" Grid.Column="3" HorizontalAlignment="Left" Margin="289.333,329,0,0" Grid.Row="1" VerticalAlignment="Top" Height="55" Width="58"/>
+        <Button x:Name="Gripper_Hold_Button" Content="Hold (M)" HorizontalAlignment="Left" VerticalAlignment="Top" Width="69" Height="42" Click="Gripper_Hold_Button_Click" Margin="344.333,376,0,0" Grid.Column="3" Grid.Row="1" RenderTransformOrigin="0.58,3.079"/>
+        <Button x:Name="Gripper_Release_Button" Content="Release (N)" Grid.Column="3" HorizontalAlignment="Left" Margin="344.333,429,0,0" Grid.Row="1" VerticalAlignment="Top" Width="69" Height="42" Click="Gripper_Release_Button_Click" RenderTransformOrigin="0.536,1.81"/>
+        <Label  Content="Gripper" Grid.Column="3" HorizontalAlignment="Left" Margin="357.333,329,0,0" Grid.Row="1" VerticalAlignment="Top" Height="38" Width="58"/>
+        <Button x:Name="Empty_Sample_Button" Content="Empty sample" Grid.Column="3" HorizontalAlignment="Left" Margin="276.333,479,0,0" Grid.Row="1" VerticalAlignment="Top" Width="137" Height="42" Click="Empty_Sample_Button_Click" RenderTransformOrigin="0.536,1.81"/>
+        <CheckBox x:Name="checkBox_1" Content="" Grid.Column="2" HorizontalAlignment="Left" Margin="174.333,166,0,0" Grid.Row="1" VerticalAlignment="Top" IsEnabled="True" Height="15" Width="19"/>
+        <CheckBox x:Name="checkBox_2" Content="" Grid.Column="2" HorizontalAlignment="Left" Margin="174.333,189,0,0" Grid.Row="1" VerticalAlignment="Top" IsEnabled="True" Height="15" Width="19"/>
+        <CheckBox x:Name="checkBox_3" Content="" Grid.Column="2" HorizontalAlignment="Left" Margin="174.333,213,0,0" Grid.Row="1" VerticalAlignment="Top" IsEnabled="True" Height="15" Width="19"/>
+        <CheckBox x:Name="checkBox_4" Content="" Grid.Column="2" HorizontalAlignment="Left" Margin="174.333,236,0,0" Grid.Row="1" VerticalAlignment="Top" IsEnabled="True" Height="15" Width="19"/>
+        <Label x:Name="label" Content="Send" Grid.Column="2" HorizontalAlignment="Left" Margin="164.333,131,0,0" Grid.Row="1" VerticalAlignment="Top" RenderTransformOrigin="0.474,0.462" Height="30" Width="37"/>
+        <Border BorderBrush="Black" BorderThickness="1" HorizontalAlignment="Left" Height="187" Margin="9.333,129,0,0" Grid.Row="1" VerticalAlignment="Top" Width="212" Grid.Column="2"/>
+        <Label x:Name="label_Terminal" Content="Terminal" Grid.Column="3" HorizontalAlignment="Left" Margin="154.333,21,0,0" VerticalAlignment="Top" Width="89" Height="25" Grid.RowSpan="2"/>
+        <Label x:Name="label1" Content="W: Forward&#xA;A: Left&#xA;S: Backward&#xA;D: Right&#xA;F: Stop&#xA;Q: Rotate left&#xA;E: Rotate right" Grid.Column="1" HorizontalAlignment="Left" Margin="99,366,0,0" Grid.Row="1" VerticalAlignment="Top" Height="122" Width="113" Grid.ColumnSpan="2"/>
+        <Ellipse x:Name="lamp7" Fill="#FFF4F4F5" HorizontalAlignment="Left" Height="25" Margin="188.333,83,0,0" Stroke="Black" VerticalAlignment="Top" Width="23" RenderTransformOrigin="2.944,0.522" Grid.Column="2" Grid.Row="1"/>
+        <Label x:Name="label2" Content="Line sensors (red on top of line)" Grid.Column="2" HorizontalAlignment="Left" Height="28" Margin="24.333,41,0,0" Grid.Row="1" VerticalAlignment="Top" Width="179" RenderTransformOrigin="0.276,0.465"/>
+        <Ellipse x:Name="lamp6" Fill="#FFF4F4F5" HorizontalAlignment="Left" Height="25" Margin="160.333,83,0,0" Stroke="Black" VerticalAlignment="Top" Width="23" RenderTransformOrigin="2.944,0.522" Grid.Column="2" Grid.Row="1"/>
+        <Ellipse x:Name="lamp5" Fill="#FFF4F4F5" HorizontalAlignment="Left" Height="25" Margin="132.333,83,0,0" Stroke="Black" VerticalAlignment="Top" Width="23" RenderTransformOrigin="2.944,0.522" Grid.Column="2" Grid.Row="1"/>
+        <Ellipse x:Name="lamp4" Fill="#FFF4F4F5" HorizontalAlignment="Left" Height="25" Margin="104.333,83,0,0" Stroke="Black" VerticalAlignment="Top" Width="23" RenderTransformOrigin="2.944,0.522" Grid.Column="2" Grid.Row="1"/>
+        <Ellipse x:Name="lamp3" Fill="#FFF4F4F5" HorizontalAlignment="Left" Height="25" Margin="76.333,83,0,0" Stroke="Black" VerticalAlignment="Top" Width="23" RenderTransformOrigin="2.944,0.522" Grid.Column="2" Grid.Row="1"/>
+        <Ellipse x:Name="lamp2" Fill="#FFF4F4F5" HorizontalAlignment="Left" Height="25" Margin="49.333,83,0,0" Stroke="Black" VerticalAlignment="Top" Width="23" RenderTransformOrigin="2.944,0.522" Grid.Column="2" Grid.Row="1"/>
+        <Ellipse x:Name="lamp1" Fill="#FFF4F4F5" HorizontalAlignment="Left" Height="25" Margin="21.333,83,0,0" Stroke="Black" VerticalAlignment="Top" Width="23" RenderTransformOrigin="2.944,0.522" Grid.Column="2" Grid.Row="1"/>
+        <Border BorderBrush="Black" BorderThickness="1" Grid.Column="2" HorizontalAlignment="Left" Height="82" Margin="9.333,42,0,0" Grid.Row="1" VerticalAlignment="Top" Width="212"/>
+        <Button x:Name="Start_mission" Content="Start mission" HorizontalAlignment="Left" Height="38" Margin="396,440,0,0" Grid.Row="1" VerticalAlignment="Top" Width="90" Click="Start_mission_Click" Grid.ColumnSpan="2" RenderTransformOrigin="0.513,-0.368"/>
+        <Button x:Name="Calibrate" Content="Floor" HorizontalAlignment="Left" Height="36" Margin="396,399,0,0" Grid.Row="1" VerticalAlignment="Top" Width="90" Click="Calibrate_Click" RenderTransformOrigin="0.02,0.635" Grid.ColumnSpan="2"/>
+        <Button x:Name="Return_home" Content="Return home" HorizontalAlignment="Left" Height="34" Margin="396,484,0,0" Grid.Row="1" VerticalAlignment="Top" Width="90" Click="Return_home_Click" Grid.ColumnSpan="2"/>
+        <GroupBox x:Name="groupBox" Header="Keyboard Controls" HorizontalAlignment="Left" Margin="79,349,0,0" Grid.Row="1" VerticalAlignment="Top" Height="139" Width="123" Grid.Column="1" Grid.ColumnSpan="2"/>
+        <TextBlock x:Name="rh_ref_rs_Status" Grid.Column="1" HorizontalAlignment="Left" Margin="25,277,0,0" Grid.Row="1" TextWrapping="Wrap" Text="Hand-ref-Shoulder: Unknown" VerticalAlignment="Top" Height="67" Width="155"/>
+
+        <CheckBox x:Name="checkBox_Hex" Content="Show Hexadecimal" Grid.Column="3" HorizontalAlignment="Left" Margin="271.333,3,0,0" VerticalAlignment="Top" Height="15" Grid.Row="1" Width="120" />
+        <Button x:Name="Arm_speed_increase" Content="+" Grid.Column="3" HorizontalAlignment="Left" Height="34" Margin="32.333,277,0,0" Grid.Row="1" VerticalAlignment="Top" Width="35" Click="Arm_speed_increase_button_Click"/>
+        <Button x:Name="Arm_speed_decrease" Content="-" Grid.Column="3" HorizontalAlignment="Left" Height="34" Margin="85.333,277,0,0" Grid.Row="1" VerticalAlignment="Top" Width="35" Click="Arm_speed_decrease_button_Click" RenderTransformOrigin="1.933,0.515"/>
+        <Label x:Name="Arm_speed" Content="Arm sensitivity:" Grid.Column="3" HorizontalAlignment="Left" Height="29" Margin="29.333,253,0,0" Grid.Row="1" VerticalAlignment="Top" Width="91"/>
+        <CheckBox x:Name="Arm_mode" Content="Arm mode" Grid.Column="3" HorizontalAlignment="Left" Height="23" Margin="32.333,224,0,0" Grid.Row="1" VerticalAlignment="Top" Width="85" Checked="Arm_mode_checked" Unchecked="Arm_mode_unchecked"/>
+        <Button x:Name="Send_angles" Content="Send angles" Grid.Column="3" HorizontalAlignment="Left" Height="34" Margin="32.333,166,0,0" Grid.Row="1" VerticalAlignment="Top" Width="88" Click="Send_angles_Click"/>
+        <TextBox x:Name="X_BOX" Grid.Column="2" HorizontalAlignment="Left" Height="23" Margin="17.333,9,0,0" Grid.Row="1" TextWrapping="Wrap" Text="" VerticalAlignment="Top" Width="62"/>
+        <TextBox x:Name="Y_BOX" Grid.Column="2" HorizontalAlignment="Left" Height="23" Margin="84.333,9,0,0" Grid.Row="1" TextWrapping="Wrap" Text="" VerticalAlignment="Top" Width="62"/>
+        <TextBox x:Name="theta_BOX" Grid.Column="2" HorizontalAlignment="Left" Height="23" Margin="151.333,9,0,0" Grid.Row="1" TextWrapping="Wrap" Text="" VerticalAlignment="Top" Width="62"/>
+        <Button x:Name="Pick_up" Content="Pick up" Grid.Column="3" HorizontalAlignment="Left" Margin="32.333,113,0,0" Grid.Row="1" VerticalAlignment="Top" Width="88" Height="37" Click="Pick_up_Click"/>
+        <CheckBox x:Name="theta_lock_checkBox" Content="Thetalock" Grid.Column="3" HorizontalAlignment="Left" Margin="32.333,71,0,0" Grid.Row="1" VerticalAlignment="Top" Height="16" Width="71"/>
+        <Border BorderBrush="Black" BorderThickness="1" Grid.Column="2" HorizontalAlignment="Left" Height="51" Margin="10.333,10,0,0" Grid.RowSpan="2" VerticalAlignment="Top" Width="211"/>
+        <Label x:Name="x_label" Content="X" Grid.Column="2" HorizontalAlignment="Left" Height="27" Margin="40.333,10,0,0" VerticalAlignment="Top" Width="18" Grid.RowSpan="2"/>
+        <Label x:Name="y_label" Content="Y" Grid.Column="2" HorizontalAlignment="Left" Height="27" Margin="109.333,10,0,0" VerticalAlignment="Top" Width="18" Grid.RowSpan="2" RenderTransformOrigin="0.13,0.519"/>
+        <Label x:Name="theta_label" Content="Theta" Grid.Column="2" HorizontalAlignment="Left" Height="27" Margin="160.333,10,0,0" VerticalAlignment="Top" Width="41" Grid.RowSpan="2" RenderTransformOrigin="4.056,0.531"/>
+
+    </Grid>
+</Window>
